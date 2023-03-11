@@ -1,0 +1,13 @@
+{
+  "version" : "2018-05-29",
+  "operation" : "QueryItem",
+  "query" : {
+    "expression" : "status != :status and patientId = :patientId",
+    "expressionValues" : {
+      ":status" : $util.dynamodb.toDynamoDBJson("cancelled")
+      ":patientId" : $util.dynamodb.toDynamoDBJson($context.arguments.patientId)
+    }
+  },
+  "index": "byEmail",
+  "select" : "ALL_ATTRIBUTES"
+}

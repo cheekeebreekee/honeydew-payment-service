@@ -1,0 +1,104 @@
+Resources:
+  SubscriptionsTable:
+    Type: "AWS::DynamoDB::Table"
+    DeletionPolicy: Retain
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+        - AttributeName: "patientId"
+          AttributeType: "S"
+        - AttributeName: "status"
+          AttributeType: "S"
+        - AttributeName: "type"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        - IndexName: patientIdIndex
+          KeySchema:
+            - AttributeName: id
+              KeyType: "HASH"
+            - AttributeName: patientId
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+        - IndexName: statusIndex
+          KeySchema:
+            - AttributeName: id
+              KeyType: "HASH"
+            - AttributeName: status
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+      TableName: ${param:subscriptionsTable}
+
+  PricesTable:
+    Type: "AWS::DynamoDB::Table"
+    DeletionPolicy: Retain
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+        - AttributeName: "type"
+          AttributeType: "S"
+        - AttributeName: "title"
+          AttributeType: "S"
+        - AttributeName: "amount"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      GlobalSecondaryIndexes:
+        - IndexName: typeIndex
+          KeySchema:
+            - AttributeName: type
+              KeyType: "HASH"
+          Projection:
+            ProjectionType: "ALL"
+      TableName: ${param:pricesTable}
+
+  # Define the SQS queue
+  StripeEventsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stripe-events-sqs
+      RedrivePolicy:
+        deadLetterTargetArn:
+          "Fn::GetAtt":
+            - StripeEventsDeadLetterQueue
+            - Arn
+        maxReceiveCount: 1
+
+  StripeEventsDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: stripe-events-sqs-dlq
+
+  StripeEventsDeadLetterQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sqs.amazonaws.com
+            Action: SQS:SendMessage
+            Resource: !GetAtt StripeEventsQueue.Arn
+      Queues:
+        - Ref: StripeEventsDeadLetterQueue
+
+  # Allow EventBridge to invoke SQS
+  EventBridgeToToSqsPolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: SQS:SendMessage
+            Resource: !GetAtt StripeEventsQueue.Arn
+      Queues:
+        - Ref: StripeEventsQueue

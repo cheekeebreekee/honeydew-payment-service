@@ -1,0 +1,62 @@
+{
+  "name": "honeydew-payment-service",
+  "version": "1.0.0",
+  "description": "Service responsible for products, payments and all work with Stripe API in the system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier --check .",
+    "prettier:fix": "prettier --write .",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint --fix . --ext .ts",
+    "fix:all": "prettier --write . && tslint -p tsconfig.json --fix",
+    "aws:login": "aws codeartifact login --profile honeydew --tool npm --repository honeydew-shared --domain honeydew --domain-owner 882887517494 --region us-east-1",
+    "build": "rimraf dist && tsc",
+    "deploy:test": "npm run lint:fix && npm run prettier:fix && sls deploy --stage test --config ./serverless.yml",
+    "deploy:prod": "npm run lint:fix && npm run prettier:fix && sls deploy --stage prod --config ./serverless.yml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cheekeebreekee/honeydew-payment-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cheekeebreekee/honeydew-payment-service/issues"
+  },
+  "homepage": "https://github.com/cheekeebreekee/honeydew-payment-service#readme",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.289.0",
+    "@aws-sdk/client-sns": "^3.272.0",
+    "@aws-sdk/signature-v4-crt": "^3.272.0",
+    "@aws-sdk/util-dynamodb": "^3.289.0",
+    "@types/aws-lambda": "^8.10.92",
+    "@types/node": "^18.13.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "honeydew-shared": "^1.0.39",
+    "joi": "^17.6.0",
+    "serverless-appsync-plugin": "^2.2.0",
+    "serverless-domain-manager": "^6.0.3",
+    "serverless-plugin-lambda-dead-letter": "^1.2.1",
+    "serverless-prune-plugin": "^2.0.1",
+    "serverless-webpack": "^5.11.0",
+    "stripe": "^11.13.0",
+    "terser-webpack-plugin": "^5.3.6",
+    "ts-loader": "^9.4.2",
+    "tsconfig-paths-webpack-plugin": "^4.0.0",
+    "typescript": "^4.9.5",
+    "uuid": "^9.0.0",
+    "webpack": "^5.75.0"
+  },
+  "devDependencies": {
+    "@types/handlebars-helpers": "^0.5.3",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
+    "eslint": "^8.34.0",
+    "prettier": "^2.8.4",
+    "serverless": "^3.27.0"
+  }
+}

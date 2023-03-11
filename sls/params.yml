@@ -1,0 +1,6 @@
+default:
+  notificationEventDetailType: Honeydew Email/SMS Notification Event
+test:
+  notificationEventDetailType: Honeydew Email/SMS Notification Event
+prod:
+  notificationEventDetailType: Honeydew Email/SMS Notification Event

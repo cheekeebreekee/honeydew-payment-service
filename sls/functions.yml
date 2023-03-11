@@ -1,0 +1,25 @@
+stripeEventsWebhook:
+  handler: src/api/stripe-events-webhook.handler
+  memorySize: 128
+  description: Stripe Events Webhook
+  events:
+    - http:
+        method: post
+        path: /stripe-events-webhook
+
+processStripeEvents:
+  handler: src/jobs/process-stripe-events.handler
+  memorySize: 256
+  description: Stripe events processing lambda
+  events:
+    - sqs:
+        arn: !GetAtt StripeEventsQueue.Arn
+        batchSize: 1
+
+getPrices:
+  handler: src/api/get-prices.handler
+  memorySize: 256
+
+getPromotion:
+  handler: src/api/get-promotion-code.handler
+  memorySize: 256

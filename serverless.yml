@@ -1,0 +1,77 @@
+service: honeydew-payment-service
+
+frameworkVersion: ">=3.1.0"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: ${opt:stage, 'test'}
+  profile: honeydew
+  timeout: 30
+  lambdaHashingVersion: 20201221
+  environment:
+    BRAND: honeydew
+    ENVIRONMENT: ${opt:stage, 'test'}
+    SERVICE: payment-service
+    DEBUG: true
+    SUBSCRIPTIONS_TABLE: ${param:subscriptionsTable}
+    PRICES_TABLE: ${param:pricesTable}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchWriteItem
+        - dynamodb:BatchGetItem
+        - sns:Publish
+        - s3:PutObject
+        - sqs:*
+        - ssm:GetParameter
+        - cognito-identity:*
+        - ses:SendEmail
+      Resource: "*"
+
+custom:
+  prune:
+    automatic: true
+    number: 5
+  webpack:
+    packager: "npm"
+    keepOutputDirectory: true
+
+params:
+  default:
+    notificationEventDetailType: Honeydew Email/SMS Notification Event
+    subscriptionsTable: honeydew-subscriptions-table
+    pricesTable: honeydew-prices-table
+
+functions:
+  - ${file(./sls/functions.yml)}
+
+resources:
+  - ${file(./sls/resources.yml)}
+
+plugins:
+  - serverless-prune-plugin
+  - serverless-webpack
+  - serverless-plugin-lambda-dead-letter
+  - serverless-appsync-plugin
+
+package:
+  patterns:
+    - "!.git"
+    - "!.gitignore"
+    - "!.editorconfig"
+    - "!.eslintignore"
+    - "!.eslintrc.js"
+    - "!sls/**"
+    - "!README.md"
+    - "!serverless.yml"
+    - "!jest.config.js"
+    - "!tsconfig.json"
+    - "!webpack.config.js"

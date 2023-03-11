@@ -1,0 +1,31 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Query {
+  getPrices: [Price!]!
+  getActiveSubscriptions(patientId: String): [Subscription!]
+}
+
+type Mutation {
+  createAppointment(newAppointment: AppointmentInput!): Appointment!
+  addAppointmentStatus(appointmentStatus: AppointmentStatusInput!): Appointment!
+  createNote(newNote: NoteInput!): Note!
+}
+
+type Price {
+  id: String!
+  type: String!
+  title: String!
+  amount: Int!
+  subscriptionType: String
+  medicineId: String
+}
+
+type Subscription {
+  id: String!
+  patientId: String!
+  status: String!
+  type: String!
+}
