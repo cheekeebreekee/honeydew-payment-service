@@ -3,15 +3,53 @@ schema {
   mutation: Mutation
 }
 
+
 type Query {
   getPrices: [Price!]!
   getActiveSubscriptions(patientId: String): [Subscription!]
+  getPromotion(promotionCode: String): Promotion!
+  getCustomerInfo(customerId: String): CustomerInfo!
 }
 
 type Mutation {
-  createAppointment(newAppointment: AppointmentInput!): Appointment!
-  addAppointmentStatus(appointmentStatus: AppointmentStatusInput!): Appointment!
-  createNote(newNote: NoteInput!): Note!
+  processCheckout(payload: CheckoutInput!): Nothing
+}
+
+# GraphQL schema doesn't have an ability to provide empty response type
+# Here's the stub one
+type Nothing {
+  id: Boolean
+}
+
+type Promotion {
+  id: String!
+  percentOff: Float
+  duration: String!
+  appliesToProducts: [String!]
+}
+
+type ShippingInfo {
+  addressLine1: String!
+  addressLine2: String
+  city: String!
+  state: String!
+  zipCode: String!
+}
+
+type ProductItem {
+  quantity: Int!
+  price: String!
+}
+
+input CheckoutInput {
+  customerId: String!
+  patientId: String!
+  paymentMethodId: String!
+  isPaymentMethodExists: Boolean
+  subscriptionPrice: String
+  shippingInfo: ShippingInfo
+  promotionCode: String
+  productItems: [ProductItem!]
 }
 
 type Price {
@@ -28,4 +66,16 @@ type Subscription {
   patientId: String!
   status: String!
   type: String!
+}
+
+type PaymentMethods {
+  id: String!
+  billingName: String
+  brand: String
+  cardNumber: String
+}
+
+type CustomerInfo {
+  internalCredit: Int!
+  paymentMethods: [PaymentMethods]!
 }

@@ -17,12 +17,28 @@ mappingTemplates:
   - type: Query
     field: getPromotion
     dataSource: getPromotionLambda
+  - type: Query
+    field: getCutomerInfo
+    dataSource: getCustomerInfoLambda
+
+  # MUTATIONS
+  - type: Mutation
+    field: processCheckout
+    dataSource: processCheckoutLambda
 
 dataSources:
   - type: AWS_LAMBDA
     name: getPromotionLambda
     config:
       functionName: getPromotion
+  - type: AWS_LAMBDA
+    name: getCustomerInfoLambda
+    config:
+      functionName: getCustmerInfo
+  - type: AWS_LAMBDA
+    name: processCheckoutLambda
+    config:
+      functionName: processCheckout
   - type: AMAZON_DYNAMODB
     name: pricesTable
     config:

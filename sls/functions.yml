@@ -1,3 +1,4 @@
+# Webhooks
 stripeEventsWebhook:
   handler: src/api/stripe-events-webhook.handler
   memorySize: 128
@@ -7,6 +8,7 @@ stripeEventsWebhook:
         method: post
         path: /stripe-events-webhook
 
+# SQS handlers
 processStripeEvents:
   handler: src/jobs/process-stripe-events.handler
   memorySize: 256
@@ -16,10 +18,15 @@ processStripeEvents:
         arn: !GetAtt StripeEventsQueue.Arn
         batchSize: 1
 
-getPrices:
-  handler: src/api/get-prices.handler
-  memorySize: 256
-
+# AppSync GraphQL handlers
 getPromotion:
   handler: src/api/get-promotion-code.handler
+  memorySize: 256
+
+getCustomerInfo:
+  handler: src/api/get-customer-info.handler
+  memorySize: 256
+
+processCheckout:
+  handler: src/api/process-checkout.handler
   memorySize: 256

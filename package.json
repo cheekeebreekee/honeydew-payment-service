@@ -36,7 +36,7 @@
     "eslint-config-prettier": "^8.6.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
-    "honeydew-shared": "^1.0.39",
+    "honeydew-shared": "^1.0.59",
     "joi": "^17.6.0",
     "serverless-appsync-plugin": "^2.2.0",
     "serverless-domain-manager": "^6.0.3",

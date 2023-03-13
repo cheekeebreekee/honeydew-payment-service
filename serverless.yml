@@ -15,6 +15,7 @@ provider:
     ENVIRONMENT: ${opt:stage, 'test'}
     SERVICE: payment-service
     DEBUG: true
+    SUBSCRIPTIONS_SQS_NAME: ${param:subscriptionsSQSName}
     SUBSCRIPTIONS_TABLE: ${param:subscriptionsTable}
     PRICES_TABLE: ${param:pricesTable}
   iamRoleStatements:
@@ -46,9 +47,9 @@ custom:
 
 params:
   default:
-    notificationEventDetailType: Honeydew Email/SMS Notification Event
     subscriptionsTable: honeydew-subscriptions-table
     pricesTable: honeydew-prices-table
+    subscriptionsSQSName: !GetAtt StripeEventsQueue.Name
 
 functions:
   - ${file(./sls/functions.yml)}

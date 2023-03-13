@@ -1,13 +1,6 @@
-import {
-  DynamoDB,
-  QueryCommandInput,
-  UpdateItemCommandInput,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDB, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import {
-  SubscriptionItem,
-  SUBSCRIPTION_STATUSES,
-} from "src/types/Subscription";
+import { SUBSCRIPTION_STATUSES } from "src/types/Subscription";
 
 const dynamoDb = new DynamoDB({});
 

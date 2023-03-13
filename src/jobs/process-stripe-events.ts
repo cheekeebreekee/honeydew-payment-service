@@ -1,9 +1,12 @@
-import { enhancedSQSHandler } from "honeydew-shared";
-import { DB } from "src/shared/dynamodb";
 import {
-  SUBSCRIPTION_STATUSES,
-  SUBSCRIPTION_TYPES,
-} from "src/types/Subscription";
+  enhancedSQSHandler,
+  EventMappers,
+  Notify,
+  PatientsService,
+  publishEvent,
+} from "honeydew-shared";
+import { DynamoDBService } from "src/shared/dynamodb";
+import { SUBSCRIPTION_STATUSES } from "src/types/Subscription";
 import Stripe from "stripe";
 
 async function processSubscriptionDeletion(event: Stripe.Event) {
@@ -16,7 +19,7 @@ async function processSubscriptionDeletion(event: Stripe.Event) {
     );
   }
 
-  await DB.subscriptions.setSubscriptionStatus(
+  await DynamoDBService.subscriptions.setSubscriptionStatus(
     subscription.id,
     SUBSCRIPTION_STATUSES.CANCELLED
   );
@@ -33,13 +36,13 @@ async function processSubscriptionCreation(event: Stripe.Event) {
   }
 
   const priceId = subscription.items.data[0].price.id;
-  const price = await DB.prices.getPrice(priceId);
+  const price = await DynamoDBService.prices.getPrice(priceId);
 
   if (!price.subscriptionType) {
     throw new Error(`Subscription type not found for price ID ${priceId}`);
   }
 
-  await DB.subscriptions.createSubscription({
+  await DynamoDBService.subscriptions.createSubscription({
     patientId,
     subscriptionId: subscription.id,
     status: SUBSCRIPTION_STATUSES.INCOMPLETE,
@@ -52,13 +55,38 @@ async function processPaidInvoice(event: Stripe.Event) {
   const { subscription } = invoice;
 
   if (subscription) {
-    await DB.subscriptions.setSubscriptionStatus(
-      typeof subscription === "string" ? subscription : subscription.id,
+    const subscriptionId =
+      typeof subscription === "string" ? subscription : subscription.id;
+    await DynamoDBService.subscriptions.setSubscriptionStatus(
+      subscriptionId,
       SUBSCRIPTION_STATUSES.ACTIVE
     );
+    const { patientId } = await DynamoDBService.subscriptions.getSubscription(
+      subscriptionId
+    );
+    const patient = await PatientsService.getPatient(patientId);
+    const patientsInAccount = await PatientsService.getPatientsCountByAccountId(
+      patient.accountId
+    );
+    const subscriptionTitle = (
+      invoice.lines.data.find(
+        (lineItem) => lineItem.subscription === subscriptionId
+      ) as Stripe.InvoiceLineItem
+    ).description;
 
-    // TODO: send notification about membership to patient
-    // TODO: engage referral factory flow
+    await Notify.Email.Patient.membershipConfirmation({
+      patient: {
+        email: patient.email,
+        parentsEmail: patient.parentsInfo?.email,
+      },
+      amount: invoice.amount_paid,
+      discount: invoice.discount?.coupon.percent_off || 0,
+      subscriptionType: subscriptionTitle || "N/A",
+      isMultiaccount: patientsInAccount > 1,
+    });
+    const { payload, eventType } =
+      EventMappers.referral.rewardReferralsEvent(patientId);
+    await publishEvent(JSON.stringify(payload), eventType);
   }
 
   // TODO: consider processing of products by sending a notification to David
