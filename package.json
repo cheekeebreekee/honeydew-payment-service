@@ -12,8 +12,12 @@
     "fix:all": "prettier --write . && tslint -p tsconfig.json --fix",
     "aws:login": "aws codeartifact login --profile honeydew --tool npm --repository honeydew-shared --domain honeydew --domain-owner 882887517494 --region us-east-1",
     "build": "rimraf dist && tsc",
-    "deploy:test": "npm run lint:fix && npm run prettier:fix && sls deploy --stage test --config ./serverless.yml",
-    "deploy:prod": "npm run lint:fix && npm run prettier:fix && sls deploy --stage prod --config ./serverless.yml"
+    "deploy-dev": "npm run lint:fix && npm run prettier:fix && sls deploy --stage dev --region us-west-2 --config ./serverless.yml",
+    "deploy-test": "npm run lint:fix && npm run prettier:fix && sls deploy --stage test --region us-west-2 --config ./serverless.yml",
+    "deploy-prod": "npm run lint:fix && npm run prettier:fix && sls deploy --stage prod --region us-east-1 --config ./serverless.yml",
+    "deploy-domain-dev": "npm run lint:fix && npm run prettier:fix && sls create_domain --stage dev --config ./serverless.yml",
+    "deploy-domain-test": "npm run lint:fix && npm run prettier:fix && sls create_domain --stage test --config ./serverless.yml",
+    "deploy-domain-prod": "npm run lint:fix && npm run prettier:fix && sls create_domain --stage prod --config ./serverless-prod.yml"
   },
   "repository": {
     "type": "git",

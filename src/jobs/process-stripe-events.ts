@@ -14,9 +14,7 @@ async function processSubscriptionDeletion(event: Stripe.Event) {
   const patientId = subscription.metadata.userId;
 
   if (!patientId) {
-    throw new Error(
-      "Cannot process subscription deletion event: no patient ID found in an event."
-    );
+    throw new Error("Cannot process subscription deletion event: no patient ID found in an event.");
   }
 
   await DynamoDBService.subscriptions.setSubscriptionStatus(
@@ -30,9 +28,7 @@ async function processSubscriptionCreation(event: Stripe.Event) {
   const patientId = subscription.metadata.userId;
 
   if (!patientId) {
-    throw new Error(
-      "Cannot process subscription creation event: no patient ID found in an event."
-    );
+    throw new Error("Cannot process subscription creation event: no patient ID found in an event.");
   }
 
   const priceId = subscription.items.data[0].price.id;
@@ -55,19 +51,14 @@ async function processPaidInvoice(event: Stripe.Event) {
   const { subscription } = invoice;
 
   if (subscription) {
-    const subscriptionId =
-      typeof subscription === "string" ? subscription : subscription.id;
+    const subscriptionId = typeof subscription === "string" ? subscription : subscription.id;
     await DynamoDBService.subscriptions.setSubscriptionStatus(
       subscriptionId,
       SUBSCRIPTION_STATUSES.ACTIVE
     );
-    const { patientId } = await DynamoDBService.subscriptions.getSubscription(
-      subscriptionId
-    );
+    const { patientId } = await DynamoDBService.subscriptions.getSubscription(subscriptionId);
     const patient = await PatientsService.getPatient(patientId);
-    const patientsInAccount = await PatientsService.getPatientsCountByAccountId(
-      patient.accountId
-    );
+    const patientsInAccount = await PatientsService.getPatientsCountByAccountId(patient.accountId);
     const subscriptionTitle = (
       invoice.lines.data.find(
         (lineItem) => lineItem.subscription === subscriptionId
@@ -84,8 +75,7 @@ async function processPaidInvoice(event: Stripe.Event) {
       subscriptionType: subscriptionTitle || "N/A",
       isMultiaccount: patientsInAccount > 1,
     });
-    const { payload, eventType } =
-      EventMappers.referral.rewardReferralsEvent(patientId);
+    const { payload, eventType } = EventMappers.referral.rewardReferralsEvent(patientId);
     await publishEvent(JSON.stringify(payload), eventType);
   }
 

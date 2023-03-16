@@ -25,10 +25,7 @@ type CheckoutPayload = {
   productItems?: ProductItem[];
 };
 
-const addPaymentMethod = async (
-  paymentMethodId: string,
-  customerId: string
-) => {
+const addPaymentMethod = async (paymentMethodId: string, customerId: string) => {
   logInfo("Atatching payment method to customer");
   await StripeClient.paymentMethods.attach(paymentMethodId, {
     customer: customerId,
@@ -87,9 +84,7 @@ const createSubscription = async (
 
   // Create the subscription
   logInfo("Creating subscription", createSubscriptionPayload);
-  const subscription = await StripeClient.subscriptions.create(
-    createSubscriptionPayload
-  );
+  const subscription = await StripeClient.subscriptions.create(createSubscriptionPayload);
   logDebug("Subscription successfully created", subscription);
 };
 
@@ -125,9 +120,7 @@ const checkoutProducts = async (
     logDebug("Draft invoice successfully created", draftInvoice);
 
     logInfo("Finalizing invoice");
-    const finalizedInvoice = await StripeClient.invoices.finalizeInvoice(
-      draftInvoice.id
-    );
+    const finalizedInvoice = await StripeClient.invoices.finalizeInvoice(draftInvoice.id);
     logDebug("Invoice successfully finalized", finalizedInvoice);
 
     if (!finalizedInvoice.paid) {
@@ -140,54 +133,42 @@ const checkoutProducts = async (
   }
 };
 
-export const handler = enhancedAppSyncHandler<CheckoutPayload, null>(
-  async (event) => {
-    const {
-      customerId,
-      paymentMethodId,
-      productItems,
-      isPaymentMethodExists,
-      subscriptionPrice,
-      shippingInfo,
-      promotionCode: promotionCodeName,
-      patientId,
-    } = event.arguments;
+export const handler = enhancedAppSyncHandler<CheckoutPayload, null>(async (event) => {
+  const {
+    customerId,
+    paymentMethodId,
+    productItems,
+    isPaymentMethodExists,
+    subscriptionPrice,
+    shippingInfo,
+    promotionCode: promotionCodeName,
+    patientId,
+  } = event.arguments;
 
-    const patient = await PatientsService.getPatient(patientId);
-    const subscriptionIncluded = !!subscriptionPrice;
-    const productsIncluded = productItems && productItems?.length > 0;
+  const patient = await PatientsService.getPatient(patientId);
+  const subscriptionIncluded = !!subscriptionPrice;
+  const productsIncluded = productItems && productItems?.length > 0;
 
-    if (!subscriptionIncluded && !productsIncluded) {
-      throw new Error("Nothing to checkout");
-    }
-
-    if (!isPaymentMethodExists) {
-      await addPaymentMethod(paymentMethodId, customerId);
-    }
-
-    await updateDefaultPaymentMethod(
-      customerId,
-      paymentMethodId,
-      patient.fullName,
-      shippingInfo
-    );
-
-    const promotionCode = promotionCodeName
-      ? await StripeUtils.getPromotionCodeIdByName(promotionCodeName)
-      : null;
-
-    if (subscriptionIncluded) {
-      await createSubscription(
-        customerId,
-        patientId,
-        subscriptionPrice,
-        promotionCode?.id
-      );
-    }
-
-    if (productsIncluded) {
-      await checkoutProducts(customerId, productItems, promotionCode);
-    }
-    return null;
+  if (!subscriptionIncluded && !productsIncluded) {
+    throw new Error("Nothing to checkout");
   }
-);
+
+  if (!isPaymentMethodExists) {
+    await addPaymentMethod(paymentMethodId, customerId);
+  }
+
+  await updateDefaultPaymentMethod(customerId, paymentMethodId, patient.fullName, shippingInfo);
+
+  const promotionCode = promotionCodeName
+    ? await StripeUtils.getPromotionCodeIdByName(promotionCodeName)
+    : null;
+
+  if (subscriptionIncluded) {
+    await createSubscription(customerId, patientId, subscriptionPrice, promotionCode?.id);
+  }
+
+  if (productsIncluded) {
+    await checkoutProducts(customerId, productItems, promotionCode);
+  }
+  return null;
+});

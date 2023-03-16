@@ -15,34 +15,30 @@ type Response = {
   internalCredit: number;
 };
 
-export const handler = enhancedAppSyncHandler<Payload, Response>(
-  async (event) => {
-    const { customerId } = event.arguments;
-    const customer = await StripeClient.customers.retrieve(customerId);
+export const handler = enhancedAppSyncHandler<Payload, Response>(async (event) => {
+  const { customerId } = event.arguments;
+  const customer = await StripeClient.customers.retrieve(customerId);
 
-    logDebug("Customer found in Stripe", customer);
+  logDebug("Customer found in Stripe", customer);
 
-    const paymentMethodsResponse = await StripeClient.paymentMethods.list({
-      type: "card",
-      customer: customerId,
-    });
+  const paymentMethodsResponse = await StripeClient.paymentMethods.list({
+    type: "card",
+    customer: customerId,
+  });
 
-    logInfo("Payment methods fetched", {
-      paymentMethods: paymentMethodsResponse.data,
-    });
+  logInfo("Payment methods fetched", {
+    paymentMethods: paymentMethodsResponse.data,
+  });
 
-    const paymentMethods = paymentMethodsResponse.data.map(
-      ({ id, billing_details, card }) => ({
-        id,
-        billingName: billing_details.name,
-        brand: card?.brand,
-        cardNumber: card?.last4,
-      })
-    );
+  const paymentMethods = paymentMethodsResponse.data.map(({ id, billing_details, card }) => ({
+    id,
+    billingName: billing_details.name,
+    brand: card?.brand,
+    cardNumber: card?.last4,
+  }));
 
-    return {
-      paymentMethods,
-      internalCredit: -(customer as { balance: number }).balance || 0,
-    };
-  }
-);
+  return {
+    paymentMethods,
+    internalCredit: -(customer as { balance: number }).balance || 0,
+  };
+});

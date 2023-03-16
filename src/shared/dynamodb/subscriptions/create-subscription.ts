@@ -1,9 +1,6 @@
 import { DynamoDB } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import {
-  SUBSCRIPTION_STATUSES,
-  SUBSCRIPTION_TYPES,
-} from "src/types/Subscription";
+import { SUBSCRIPTION_STATUSES, SUBSCRIPTION_TYPES } from "src/types/Subscription";
 
 const dynamoDb = new DynamoDB({});
 

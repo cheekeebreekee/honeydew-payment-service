@@ -22,13 +22,9 @@ export async function getPromotionCodeIdByName(name: string) {
     const allPriceIDs = await StripeClient.prices.list();
     const relatedPriceIDs = relatedProductIDs
       .map((productId) => {
-        const priceIds = allPriceIDs.data.filter(
-          (price) => price.product === productId
-        );
+        const priceIds = allPriceIDs.data.filter((price) => price.product === productId);
         if (!priceIds.length)
-          throw new Error(
-            `Such product ID does not exist in Stripe: ${productId}`
-          );
+          throw new Error(`Such product ID does not exist in Stripe: ${productId}`);
         return priceIds.map(({ id }) => id);
       })
       .flat();
