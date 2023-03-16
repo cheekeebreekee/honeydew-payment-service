@@ -1,49 +1,65 @@
 name: payment-service-graphql
 schema: schema.api.graphql
-authenticationType: AMAZON_COGNITO_USER_POOLS
-userPoolConfig:
-  awsRegion: us-east-1
-  defaultAction: ALLOW
-  userPoolId: !Ref CognitoUserPool
-mappingTemplatesLocation: src/api/mapping-templates
-mappingTemplates:
+authentication:
+  type: AMAZON_COGNITO_USER_POOLS
+  config:
+    awsRegion: ${opt:region, 'us-west-2'}
+    defaultAction: ALLOW
+    userPoolId: us-west-2_Z0UfjSVd6 #todo: make it dynamic
+
+resolvers:
   # QUERIES
-  - type: Query
+  getPrices:
+    type: Query
+    kind: UNIT
     field: getPrices
     dataSource: pricesTable
-  - type: Query
+  getActiveSubscriptions:
+    type: Query
+    kind: UNIT
     field: getActiveSubscriptions
     dataSource: subscriptionsTable
-  - type: Query
+  getPromotion:
+    type: Query
+    kind: UNIT
     field: getPromotion
     dataSource: getPromotionLambda
-  - type: Query
+  getCutomerInfo:
+    type: Query
+    kind: UNIT
     field: getCutomerInfo
     dataSource: getCustomerInfoLambda
 
   # MUTATIONS
-  - type: Mutation
+  processCheckout:
+    type: Mutation
+    kind: UNIT
     field: processCheckout
     dataSource: processCheckoutLambda
 
 dataSources:
-  - type: AWS_LAMBDA
+  getPromotionLambda:
+    type: AWS_LAMBDA
     name: getPromotionLambda
     config:
       functionName: getPromotion
-  - type: AWS_LAMBDA
+  getCustomerInfoLambda:
+    type: AWS_LAMBDA
     name: getCustomerInfoLambda
     config:
-      functionName: getCustmerInfo
-  - type: AWS_LAMBDA
+      functionName: getCustomerInfo
+  processCheckoutLambda:
+    type: AWS_LAMBDA
     name: processCheckoutLambda
     config:
       functionName: processCheckout
-  - type: AMAZON_DYNAMODB
+  pricesTable:
+    type: AMAZON_DYNAMODB
     name: pricesTable
     config:
       tableName: !Ref PricesTable
-  - type: AMAZON_DYNAMODB
+  subscriptionsTable:
+    type: AMAZON_DYNAMODB
     name: subscriptionsTable
     config:
       tableName: !Ref SubscriptionsTable

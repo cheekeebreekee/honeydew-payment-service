@@ -3,14 +3,13 @@ Resources:
     Type: "AWS::DynamoDB::Table"
     DeletionPolicy: Retain
     Properties:
+      BillingMode: "PAY_PER_REQUEST"
       AttributeDefinitions:
         - AttributeName: "id"
           AttributeType: "S"
         - AttributeName: "patientId"
           AttributeType: "S"
         - AttributeName: "status"
-          AttributeType: "S"
-        - AttributeName: "type"
           AttributeType: "S"
       KeySchema:
         - AttributeName: "id"
@@ -38,15 +37,12 @@ Resources:
     Type: "AWS::DynamoDB::Table"
     DeletionPolicy: Retain
     Properties:
+      BillingMode: "PAY_PER_REQUEST"
       AttributeDefinitions:
         - AttributeName: "id"
           AttributeType: "S"
         - AttributeName: "type"
           AttributeType: "S"
-        - AttributeName: "title"
-          AttributeType: "S"
-        - AttributeName: "amount"
-          AttributeType: "N"
       KeySchema:
         - AttributeName: "id"
           KeyType: "HASH"

@@ -39,6 +39,8 @@ provider:
         - ses:SendEmail
       Resource: "*"
 
+appSync: ${file(./serverless.appsync-api.yml)}
+
 custom:
   prune:
     automatic: true

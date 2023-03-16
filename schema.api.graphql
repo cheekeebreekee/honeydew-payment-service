@@ -1,8 +1,7 @@
 schema {
   query: Query
-  mutation: Mutation
+  # mutation: Mutation
 }
-
 
 type Query {
   getPrices: [Price!]!
@@ -11,9 +10,9 @@ type Query {
   getCustomerInfo(customerId: String): CustomerInfo!
 }
 
-type Mutation {
-  processCheckout(payload: CheckoutInput!): Nothing
-}
+# type Mutation {
+#   processCheckout(payload: CheckoutInput!): Nothing
+# }
 
 # GraphQL schema doesn't have an ability to provide empty response type
 # Here's the stub one
